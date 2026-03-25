@@ -1,6 +1,6 @@
 import streamlit as st
+import cv2
 import numpy as np
-from PIL import Image
 from ultralytics import YOLO
 
 st.set_page_config(page_title="螺栓缺陷AI检测", layout="centered")
@@ -16,11 +16,8 @@ model = load_model()
 uploaded_file = st.file_uploader("点击上传图片", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    if image.mode != 'RGB':
-        image = image.convert('RGB')
-    img_array = np.array(image)
-    results = model(img_array, conf=0.25)
+    img = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR)
+    results = model(img, conf=0.25)
     annotated = results[0].plot()
     st.image(annotated, channels="BGR", caption="检测结果")
     if len(results[0].boxes) > 0:
